@@ -19,7 +19,19 @@ const todoList = [
         description:"Deploy Project",
         status:"Complete"
     },
+    {
+        id:23,
+        description:"host people",
+        status:"Complete"
+    },
+    {
+        id:17,
+        description:"bring food",
+        status:"pending"
+    },
+
 ]
+
 
 function swap(i,j){
     const temp = todoList[i];
@@ -49,9 +61,11 @@ app.get('/api/getItems',(req,res)=>{
 
 app.post('/api/updateList',(req,res)=>{
     try{
-        const {id,description} = req.body;
+        const {id,description,status} = req.body;
 
-        if(!id || !description){
+        const index = todoList.findIndex(item=>item.id == id);
+
+        if(!id || !description || !status || index!=-1){
             return res.status(400).json({
                 message:"Invalid data sent"
             })
@@ -59,10 +73,15 @@ app.post('/api/updateList',(req,res)=>{
 
         const newItem = {
             id:id,
-            description:description
+            description:description,
+            status:status
         }
 
         todoList.push(newItem)
+        res.status(201).json({
+            message:"Data Added",
+            items:todoList
+        })
 
     }
     catch(err){
@@ -141,6 +160,11 @@ app.patch('/api/updateList',(req,res)=>{
 app.get('/api/getItemsSortedById',(req,res)=>{
     try{
         const {k} = req.query;
+        if(!k){
+            res.status(400).json({
+                message:"Parameter required for sorting"
+            })
+        }
     if(k=='asc'){
        for(i=0;i<todoList.length;i++){
         for(j=0;j<todoList.length-1-i;j++){
@@ -188,7 +212,11 @@ app.get('/api/getItemsSortedById',(req,res)=>{
 app.get('/api/getItemsSortedByDescription',(req,res)=>{
     try{
         const {k} = req.query;
-
+          if(!k){
+            res.status(400).json({
+                message:"Parameter required for sorting"
+            })
+        }
         if(k=='asc'){
             for(i=0;i<todoList.length;i++){
                 for(j=0;j<todoList.length-1-i;j++){
@@ -232,11 +260,26 @@ app.get('/api/getItemsSortedByDescription',(req,res)=>{
 app.get('/api/search',(req,res)=>{
     try{
         const {search} = req.query;
-        const found = todoList.filter(item=>item.description.includes(search));
-        res.status(201).json({
+
+        if(!search){
+            res.status(400).json({
+                message:"Search field is missing"
+            })
+        }
+
+        const found = todoList.filter(item=>item.description.toLowerCase().includes(search.toLowerCase()));
+        if(found.length>0){
+             res.status(201).json({
             message:"Data fetched",
             items:found
         })
+        }
+        else{
+             res.status(201).json({
+            message:"No match found",
+        })
+        }
+       
     }
     catch(err){
         console.log(err);
