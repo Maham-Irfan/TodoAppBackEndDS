@@ -27,6 +27,12 @@ function swap(i,j){
     todoList[j] = temp;
 }
 
+app.get('/',(req,res)=>{
+    res.status(201).json({
+        message:"Server Running"
+    })
+})
+
 app.get('/api/getItems',(req,res)=>{
     try{
         return res.status(201).json({
